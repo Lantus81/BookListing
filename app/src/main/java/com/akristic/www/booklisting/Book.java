@@ -31,7 +31,8 @@ public class Book {
     public String getDescription() {
         return mDescription;
     }
-    public String getImageUrl(){
+
+    public String getImageUrl() {
         return mImageUrl;
     }
 }

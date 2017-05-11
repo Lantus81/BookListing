@@ -11,10 +11,12 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -23,82 +25,96 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements LoaderCallbacks<List<Book>> {
 
-    private static final String LOG_TAG = MainActivity.class.getName();
-
-
-    private String mUrl = "https://www.googleapis.com/books/v1/volumes?q=java&maxResults=40";
-
+    private final static String BASE_URL = "https://www.googleapis.com/books/v1/volumes?maxResults=40&q=";
+    private String mUrl;
     /**
-     * Constant value for the earthquake loader ID. We can choose any integer.
-     * This really only comes into play if you're using multiple loaders.
+     * Constant value for the book loader ID. We can choose any integer.
      */
     private static final int BOOK_LOADER_ID = 1;
-
     /**
      * Adapter for the list of books
      */
     private BookAdapter mAdapter;
-    ;
     /**
      * TextView that is displayed when the list is empty
      */
     private TextView mEmptyStateTextView;
+    private ProgressBar loadingIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Find a reference to the {@link ListView} in the layout
+        // Find a reference to the in the activity_main
         final EditText searchTextView = (EditText) findViewById(R.id.text_search);
-        final View loadingIndicator = findViewById(R.id.loading_indicator);
+        loadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         ListView bookListView = (ListView) findViewById(R.id.list);
-        mAdapter = new BookAdapter(this, new ArrayList<Book>());
         mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
+
+        mAdapter = new BookAdapter(this, new ArrayList<Book>());
         bookListView.setEmptyView(mEmptyStateTextView);
 
-        getBooksDataInBackground();
-
         loadingIndicator.setVisibility(View.GONE);
-        mEmptyStateTextView.setText("About what you wanna read today?");
+        mEmptyStateTextView.setText(R.string.welcome_message);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         bookListView.setAdapter(mAdapter);
+        // get loader only if user has searched something
+        if (savedInstanceState != null) {
+            mUrl = savedInstanceState.getString("URL");
+        }
+        if (mUrl != null) {
+            LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(BOOK_LOADER_ID, null, this);
+        }
 
         bookListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 // Find the current book that was clicked on
                 Book currentBook = mAdapter.getItem(position);
-
                 // Convert the String URL into a URI object (to pass into the Intent constructor)
-                Uri bookUri = Uri.parse(currentBook.getUrl());
 
-                // Create a new intent to view the book URI
-                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, bookUri);
+                if (currentBook != null) {
+                    Uri bookUri = Uri.parse(currentBook.getUrl());
+                    // Create a new intent to view the book URI
+                    Intent websiteIntent = new Intent(Intent.ACTION_VIEW, bookUri);
+                    // Send the intent to launch a new activity
+                    startActivity(websiteIntent);
+                }
 
-                // Send the intent to launch a new activity
-                startActivity(websiteIntent);
             }
         });
 
         Button searchButton = (Button) findViewById(R.id.button_search);
+
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //* get user input and set it ready for url
                 String keyWord = searchTextView.getText().toString().trim();
-                keyWord = keyWord.replace(" ", "");
-                mUrl = "https://www.googleapis.com/books/v1/volumes?q=" + keyWord + "&maxResults=40";
+                keyWord = keyWord.replaceAll(" +", "+");
+                //* make url
+                mUrl = BASE_URL + keyWord;
+                //* make UI look for loading books
+                mAdapter.clear();
                 loadingIndicator.setVisibility(View.VISIBLE);
                 mEmptyStateTextView.setText("");
+                //*close keyboard
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                //* get book data from internet
                 getBooksDataInBackground();
-
             }
         });
     }
 
-
+    @Override
+    public void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putString("URL", mUrl);
+    }
 
     private void getBooksDataInBackground() {
         // Get a reference to the ConnectivityManager to check state of network connectivity
@@ -136,8 +152,8 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
 
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
+
         // Hide loading indicator because the data has been loaded
-        View loadingIndicator = findViewById(R.id.loading_indicator);
         loadingIndicator.setVisibility(View.GONE);
 
         // Set empty state text to display "No books found."

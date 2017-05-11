@@ -47,10 +47,8 @@ public class QueryUtils {
         }
 
         // Extract relevant fields from the JSON response and create a list of {@link Earthquake}s
-        List<Book> books = extractFeatureFromJson(jsonResponse);
-
         // Return the list of {@link Earthquake}s
-        return books;
+        return extractFeatureFromJson(jsonResponse);
     }
 
     /**
@@ -165,7 +163,7 @@ public class QueryUtils {
                 JSONObject volumeInfo = currentBook.getJSONObject("volumeInfo");
 
                 // Extract the value for the key called "title"
-                String name ="";
+                String name = "";
                 if (volumeInfo.has("title")) {
                     name = volumeInfo.getString("title");
                 }
@@ -175,22 +173,22 @@ public class QueryUtils {
                     description = volumeInfo.getString("description");
                 }
                 // Extract the value for the key called "smallThumbnail"
-                String imageUrl="";
+                String imageUrl = "";
                 JSONObject imageLinks = volumeInfo.getJSONObject("imageLinks");
-                if (imageLinks.has("smallThumbnail")){
-                    imageUrl=imageLinks.getString("smallThumbnail");
+                if (imageLinks.has("smallThumbnail")) {
+                    imageUrl = imageLinks.getString("smallThumbnail");
                 }
 
                 // Extract the value for the key called "authors"
                 JSONArray authorsArray = volumeInfo.getJSONArray("authors");
-
                 String authors = "";
                 if (volumeInfo.has("authors")) {
                     for (int j = 0; j < authorsArray.length(); j++) {
                         authors = authors + authorsArray.getString(j) + "\n";
                     }
                 }
-                String url="";
+                // Extract the value for the key called "previewLink"
+                String url = "";
                 if (volumeInfo.has("previewLink")) {
                     url = volumeInfo.getString("previewLink");
                 }

@@ -3,17 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/medium_margin"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:padding="@dimen/medium_margin">
+
     <WebView
-    android:id="@+id/image_thumbnail"
-    android:layout_width="64dp"
-    android:layout_height="78dp"/>
+        android:id="@+id/image_thumbnail"
+        android:layout_width="64dp"
+        android:layout_height="78dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/medium_margin"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/medium_margin">
+
         <TextView
             android:id="@+id/book_name"
             android:layout_width="wrap_content"
@@ -21,19 +27,21 @@
             android:textSize="18sp"
             android:textStyle="bold"
             tools:text="Book name" />
+
         <TextView
             android:id="@+id/book_author"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
             android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
             tools:text="Author name" />
+
         <TextView
             android:id="@+id/book_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:maxLines="3"
             android:textSize="12sp"
-            android:maxLines="4"
             tools:text="Android is new, Android is open, and Android is fun. It’s also serious about business. Android for Work shows you how to harness the power of Android to stay productive and take your office on the road. This book also sheds light on the often daunting task of finding the right Android phone for the business user. Whether this is your first smartphone, your first Android smartphone, or your first attempt to make your phone into a productivity tool, Android for Work gets you started. You’ll learn how to manage email and tasks, but you’ll also learn how to weed through the sea of games to find specialized productivity tools for a variety of professions. For those that are more interested in an enterprise wide deployment, the book includes an appendix of information on administering Android phones, creating custom interfaces, and creating specialized apps for your enterprise. You’ll also learn more about integrating Android with other Google Apps for enterprise. What you’ll learn Select the Android phone that is right for you Integrate your work email and calendar tools Navigate business trips and meetings with ease Find specialized apps for your profession Collaborate with coworkers in large and small groups Harness the power of Android customization Who this book is for This book is for anyone who is considering an Android phone or who has recently purchased one. Whether you are a web designer, writer, medical professional, lawyer, or educator, an Android phone can help you be more productive and finally find a reason for having a phone with a data plan. Table of Contents Buying and Activating an Android Phone Using Your Phone for the First Time Going Online with Android Android Calling Managing Texting Wrangling Your E-mail The Calendar Android in a Microsoft World Photos and Video Web Browsing Social Media and Work Maps and Mobile The Remaining Android Apps The Android Market General Business Applications Specialized Apps for Professionals Advanced Customization and Troubleshooting Resources for Managing Enterprise-Wide Android Deployment Resources for Developing Android Apps" />
     </LinearLayout>
 
