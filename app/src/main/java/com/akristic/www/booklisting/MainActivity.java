@@ -33,12 +33,12 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
      * This really only comes into play if you're using multiple loaders.
      */
     private static final int BOOK_LOADER_ID = 1;
-    private int loaderId = 2;
+
     /**
      * Adapter for the list of books
      */
     private BookAdapter mAdapter;
-    private ListView bookListView;
+    ;
     /**
      * TextView that is displayed when the list is empty
      */
@@ -48,25 +48,25 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button searchButton = (Button) findViewById(R.id.button_search);
-        final EditText searchTextView = (EditText) findViewById(R.id.text_search);
-
         // Find a reference to the {@link ListView} in the layout
-        bookListView = (ListView) findViewById(R.id.list);
-
+        final EditText searchTextView = (EditText) findViewById(R.id.text_search);
+        final View loadingIndicator = findViewById(R.id.loading_indicator);
+        ListView bookListView = (ListView) findViewById(R.id.list);
+        mAdapter = new BookAdapter(this, new ArrayList<Book>());
         mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
         bookListView.setEmptyView(mEmptyStateTextView);
 
-        // Create a new {@link ArrayAdapter} of books
-        mAdapter = new BookAdapter(this, new ArrayList<Book>());
+        getBooksDataInBackground();
+
+        loadingIndicator.setVisibility(View.GONE);
+        mEmptyStateTextView.setText("About what you wanna read today?");
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         bookListView.setAdapter(mAdapter);
 
-        // Set an item click listener on the ListView, which sends an intent to a web browser
-        // to open a website with more information about the selected book.
         bookListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 // Find the current book that was clicked on
@@ -83,72 +83,24 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
             }
         });
 
-        // Get a reference to the ConnectivityManager to check state of network connectivity
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        // Get details on the currently active default data network
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-
-        // If there is a network connection, fetch data
-        if (networkInfo != null && networkInfo.isConnected()) {
-            // Get a reference to the LoaderManager, in order to interact with loaders.
-            LoaderManager loaderManager = getLoaderManager();
-
-            // Initialize the loader. Pass in the int ID constant defined above and pass in null for
-            // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
-            // because this activity implements the LoaderCallbacks interface).
-            loaderManager.initLoader(BOOK_LOADER_ID, null, this);
-        } else {
-            // Otherwise, display error
-            // First, hide loading indicator so error message will be visible
-            View loadingIndicator = findViewById(R.id.loading_indicator);
-            loadingIndicator.setVisibility(View.GONE);
-
-            // Update empty state with no connection error message
-            mEmptyStateTextView.setText(R.string.no_internet_connection);
-        }
-
+        Button searchButton = (Button) findViewById(R.id.button_search);
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String keyWord = searchTextView.getText().toString().trim();
                 keyWord = keyWord.replace(" ", "");
                 mUrl = "https://www.googleapis.com/books/v1/volumes?q=" + keyWord + "&maxResults=40";
-                View loadingIndicator = findViewById(R.id.loading_indicator);
                 loadingIndicator.setVisibility(View.VISIBLE);
                 mEmptyStateTextView.setText("");
-                mAdapter.clear();
-                getBooksDataInBackground(loaderId);
-                loaderId++;
-                setLinksToAllBooks();
+                getBooksDataInBackground();
+
             }
         });
     }
 
-    private void setLinksToAllBooks() {
-        // Set an item click listener on the ListView, which sends an intent to a web browser
-        // to open a website with more information about the selected book.
 
-        bookListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                // Find the current book that was clicked on
-                Book currentBook = mAdapter.getItem(position);
 
-                // Convert the String URL into a URI object (to pass into the Intent constructor)
-                Uri bookUri = Uri.parse(currentBook.getUrl());
-
-                // Create a new intent to view the book URI
-                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, bookUri);
-
-                // Send the intent to launch a new activity
-                startActivity(websiteIntent);
-            }
-        });
-    }
-
-    private void getBooksDataInBackground(int id) {
+    private void getBooksDataInBackground() {
         // Get a reference to the ConnectivityManager to check state of network connectivity
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -160,11 +112,11 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         if (networkInfo != null && networkInfo.isConnected()) {
             // Get a reference to the LoaderManager, in order to interact with loaders.
             LoaderManager loaderManager = getLoaderManager();
-
+            loaderManager.restartLoader(BOOK_LOADER_ID, null, this);
             // Initialize the loader. Pass in the int ID constant defined above and pass in null for
             // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
             // because this activity implements the LoaderCallbacks interface).
-            loaderManager.initLoader(id, null, this);
+            loaderManager.initLoader(BOOK_LOADER_ID, null, this);
         } else {
             // Otherwise, display error
             // First, hide loading indicator so error message will be visible
@@ -191,13 +143,14 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         // Set empty state text to display "No books found."
         mEmptyStateTextView.setText(R.string.no_books);
 
-        // Clear the adapter of previous earthquake data
+        // Clear the adapter of previous book data
         mAdapter.clear();
 
-        // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
+        // If there is a valid list of {@link Book}s, then add them to the adapter's
         // data set. This will trigger the ListView to update.
         if (books != null && !books.isEmpty()) {
             mAdapter.addAll(books);
+
         }
     }
 
