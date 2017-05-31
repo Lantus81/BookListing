@@ -18,7 +18,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.R.attr.description;
 
 
 public class QueryUtils {

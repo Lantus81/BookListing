@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
             LoaderManager loaderManager = getLoaderManager();
             loaderManager.initLoader(BOOK_LOADER_ID, null, this);
         }
-
         bookListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
